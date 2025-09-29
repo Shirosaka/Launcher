@@ -146,14 +146,18 @@ impl UpdateSource for GitHubSource {
             if let Some(asset) = release.assets.iter().find(|a| a.name == asset.FileName) {
                 info!(
                     "About to download GitHub release from URL '{}' to file '{}'",
-                    asset.url, local_file
+                    asset.browser_download_url, local_file
                 );
 
-                download::download_url_to_file(&asset.url, local_file, move |p| {
-                    if let Some(progress_sender) = &progress_sender {
-                        let _ = progress_sender.send(p);
-                    }
-                })?;
+                download::download_url_to_file(
+                    &asset.browser_download_url,
+                    local_file,
+                    move |p| {
+                        if let Some(progress) = &progress_sender {
+                            let _ = progress.send(p);
+                        }
+                    },
+                )?;
             } else {
                 return Err(Error::Generic("Couldn't find correct asset whoops".into()));
             }
@@ -200,6 +204,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         Err(e) => error!("Failed constructing update manager: {}", e),
     };
+
+    std::thread::sleep(std::time::Duration::from_secs(25));
 
     Ok(())
 }
