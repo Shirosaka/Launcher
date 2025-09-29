@@ -179,7 +179,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     VelopackApp::build().run();
 
     let source = GitHubSource::new(
-        "https://github.com/German-Immersive-Railroading-Community/Launcher".to_owned(),
+        "https://github.com/Shirosaka/Launcher".to_owned(),
         None,
         true,
     );
