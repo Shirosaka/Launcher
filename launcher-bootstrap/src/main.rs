@@ -33,9 +33,6 @@ struct GitHubSource {
 
     /// If true, downloads the latest pre-release. If false, downloads the latest stable release.
     pre_release: bool,
-
-    // Exists so that we can retrieve release info easily when we download an asset
-    releases: Vec<GitHubRelease>,
 }
 
 impl GitHubSource {
@@ -50,7 +47,6 @@ impl GitHubSource {
             repo_uri,
             access_token,
             pre_release,
-            releases: Vec::new(),
         }
     }
 
@@ -143,7 +139,7 @@ impl UpdateSource for GitHubSource {
         progress_sender: Option<std::sync::mpsc::Sender<i16>>,
     ) -> Result<(), Error> {
         if let Some(release) = self
-            .releases
+            .get_releases(self.pre_release)?
             .iter()
             .find(|r| r.assets.iter().any(|r| r.name == asset.FileName))
         {
@@ -162,7 +158,9 @@ impl UpdateSource for GitHubSource {
                 return Err(Error::Generic("Couldn't find correct asset whoops".into()));
             }
         } else {
-            return Err(Error::Generic("Couldn't find correct release whoops".into()));
+            return Err(Error::Generic(
+                "Couldn't find correct release whoops".into(),
+            ));
         }
 
         Ok(())
